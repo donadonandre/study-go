@@ -15,5 +15,5 @@
 * Pesquisar sobre testify do Go
 
 * Se quiser rodar um teste só
-> go test --run <nomeDoTeste> 
+> go test -run <nomeDoTeste> 
 
