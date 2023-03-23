@@ -22,5 +22,7 @@ func HandleRequests() {
 
 	r.GET("/index", controllers.ExibePaginaIndex)
 
+	r.NoRoute(controllers.RotaNaoEncontrada)
+
 	r.Run()
 }
