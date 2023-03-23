@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"gin-study/api/controllers"
 	"gin-study/api/database"
@@ -18,7 +19,7 @@ import (
 var ID int
 
 func SetupRotasDeTeste() *gin.Engine {
-	// gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	rotas := gin.Default()
 	return rotas
 }
@@ -106,4 +107,35 @@ func TestBuscaAlunoIDHandler(t *testing.T) {
 
 	assert.Equal(t, "Aluno teste", alunoMock.Nome)
 	assert.Equal(t, "12345678900", alunoMock.CPF)
+}
+
+func TestDeletaAlunoHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+	CriaAlunoMock()
+	r := SetupRotasDeTeste()
+	r.DELETE("/alunos/:id", controllers.RemoveAluno)
+	pathDeBusca := "/alunos/" + strconv.Itoa(ID)
+	req, _ := http.NewRequest("DELETE", pathDeBusca, nil)
+	resposta := httptest.NewRecorder()
+	r.ServeHTTP(resposta, req)
+	assert.Equal(t, http.StatusOK, resposta.Code)
+}
+
+func TestEditaUmAlunoHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+	CriaAlunoMock()
+	defer DeletaAlunoMock()
+	r := SetupRotasDeTeste()
+	r.PATCH("/alunos/:id", controllers.EditaAluno)
+	aluno := models.Aluno{Nome: "Nome do Aluno Teste", CPF: "47123456789", RG: "123456700"}
+	valorJson, _ := json.Marshal(aluno)
+	pathParaEditar := "/alunos/" + strconv.Itoa(ID)
+	req, _ := http.NewRequest("PATCH", pathParaEditar, bytes.NewBuffer(valorJson))
+	resposta := httptest.NewRecorder()
+	r.ServeHTTP(resposta, req)
+	var alunoMockAtualizado models.Aluno
+	json.Unmarshal(resposta.Body.Bytes(), &alunoMockAtualizado)
+	assert.Equal(t, "47123456789", alunoMockAtualizado.CPF)
+	assert.Equal(t, "123456700", alunoMockAtualizado.RG)
+	assert.Equal(t, "Nome do Aluno Teste", alunoMockAtualizado.Nome)
 }
