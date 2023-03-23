@@ -10,6 +10,10 @@
 
 > No terminal, digitar `go test`
 
+# Aula 3
+
 * Pesquisar sobre testify do Go
 
+* Se quiser rodar um teste só
+> go test --run <nomeDoTeste> 
 
