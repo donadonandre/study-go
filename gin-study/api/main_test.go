@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"gin-study/api/controllers"
 	"gin-study/api/database"
 	"gin-study/api/models"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +18,7 @@ import (
 var ID int
 
 func SetupRotasDeTeste() *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
+	// gin.SetMode(gin.ReleaseMode)
 	rotas := gin.Default()
 	return rotas
 }
@@ -82,4 +84,26 @@ func TestBuscaAlunoPorCPFHandler(t *testing.T) {
 	r.ServeHTTP(response, req)
 
 	assert.Equal(t, http.StatusOK, response.Code)
+}
+
+func TestBuscaAlunoIDHandler(t *testing.T) {
+	database.ConectaComBancoDeDados()
+
+	CriaAlunoMock()
+	defer DeletaAlunoMock()
+
+	r := SetupRotasDeTeste()
+	r.GET("/alunos/:id", controllers.BuscaAlunoPorID)
+
+	pathDaBusca := "/alunos/" + strconv.Itoa(ID)
+	req, _ := http.NewRequest("GET", pathDaBusca, nil)
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, req)
+
+	var alunoMock models.Aluno
+
+	json.Unmarshal(response.Body.Bytes(), &alunoMock)
+
+	assert.Equal(t, "Aluno teste", alunoMock.Nome)
+	assert.Equal(t, "12345678900", alunoMock.CPF)
 }
