@@ -10,4 +10,6 @@
 
 > No terminal, digitar `go test`
 
+* Pesquisar sobre testify do Go
+
 
